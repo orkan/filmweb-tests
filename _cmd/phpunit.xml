@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.1/phpunit.xsd"
+	bootstrap="..\..\vendor\autoload.php"
+	verbose="true"
+	>
+
+	<testsuites>
+
+		<testsuite name="all">
+			<file>..\FilmwebTest.php</file>
+			<file>..\UtilsTest.php</file>
+			<directory suffix="Test.php">..\Api</directory>
+		</testsuite>
+
+		<testsuite name="methods">
+			<directory suffix="Test.php">..\Api\Method</directory>
+			<exclude>..\Api\Method\MethodTest.php</exclude>
+		</testsuite>
+
+    </testsuites>
+
+</phpunit>
