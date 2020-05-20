@@ -8,6 +8,9 @@ use Orkan\Filmweb\Transport\Curl;
 use Orkan\Filmweb\Transport\Transport;
 use PHPUnit\Framework\TestCase;
 
+// Suppress print to STDERR in Filmweb->errorHandler()
+define( 'TESTING', true );
+
 class FilmwebTest extends TestCase
 {
 	protected $filmweb;
@@ -109,16 +112,14 @@ class FilmwebTest extends TestCase
 	 * Use E_DEPRECATED const to trigger Logger->unknown() in Filmweb->errorHandler()
 	 * Note:
 	 * There is no way to catch STDERR in PHPUnit
-	 * Don't use E_(USER)ERROR\WARNING since they'll trigger exit()
+	 * Use define( 'TESTING', true ) to test for error handling and not trigger exit()
 	 */
 	public function test_errorHandler_unknown()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-
 		error_reporting( E_DEPRECATED ); // Proccess this error in Filmweb->errorHandler()
-		$this->app['logger']->expects( $this->once() )->method( 'unknown' );
 
-		\Orkan\Filmweb\Utils::stderr( "\n" );
+		$this->app['logger']->expects( $this->once() )->method( 'unknown' );
 		$this->filmweb->errorHandler( E_DEPRECATED, 'Testing Filmweb->errorHandler() with E_DEPRECATED', __FILE__, __LINE__ );
 
 		error_reporting( $tmp ); // Recover original error_reporting
@@ -127,12 +128,21 @@ class FilmwebTest extends TestCase
 	public function test_errorHandler_notice()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-
 		error_reporting( E_NOTICE );
-		$this->app['logger']->expects( $this->once() )->method( 'notice' );
 
-		\Orkan\Filmweb\Utils::stderr( "\n" );
+		$this->app['logger']->expects( $this->once() )->method( 'notice' );
 		$this->filmweb->errorHandler( E_NOTICE, 'Testing Filmweb->errorHandler() with E_NOTICE', __FILE__, __LINE__ );
+
+		error_reporting( $tmp ); // Recover original error_reporting
+	}
+
+	public function test_errorHandler_error()
+	{
+		$tmp = error_reporting(); // Remember current error_reporting
+		error_reporting( E_ERROR );
+
+		$this->app['logger']->expects( $this->once() )->method( 'error' );
+		$this->filmweb->errorHandler( E_ERROR, 'Testing Filmweb->errorHandler() with E_NOTICE', __FILE__, __LINE__ );
 
 		error_reporting( $tmp ); // Recover original error_reporting
 	}
@@ -143,8 +153,8 @@ class FilmwebTest extends TestCase
 	public function test_errorHandler_ignore_notice()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-
 		error_reporting( E_ALL & ~ E_NOTICE ); // Do not report E_NOTICE in Filmweb->errorHandler()
+
 		$this->app['logger']->expects( $this->never() )->method( 'notice' );
 		$this->filmweb->errorHandler( E_NOTICE, 'Testing Filmweb->errorHandler() with ignored E_NOTICE', __FILE__, __LINE__ );
 
