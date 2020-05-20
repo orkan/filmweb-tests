@@ -1,7 +1,7 @@
 <?php
 use Orkan\Filmweb\Logger;
 use Orkan\Filmweb\Api\Api;
-use Orkan\Filmweb\Test\Utils;
+use Orkan\Filmweb\Tests\Utils;
 use Orkan\Filmweb\Transport\Curl;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
@@ -21,13 +21,14 @@ class ApiTest extends TestCase
 
 		// Create empty stubs
 		// Tip: Stubs has disabled constructor, all methods returns null
-		$logger = $this->createStub( Logger::class );
-		$this->app['logger'] = function () use ($logger ) {
-			return $logger;
+		$stub = $this->createStub( Logger::class );
+		$this->app['logger'] = function () use ($stub ) {
+			return $stub;
 		};
-		$send = $this->createStub( Curl::class );
-		$this->app['send'] = function () use ($send ) {
-			return $send;
+
+		$stub = $this->createStub( Curl::class );
+		$this->app['send'] = function () use ($stub ) {
+			return $stub;
 		};
 	}
 
@@ -58,13 +59,32 @@ class ApiTest extends TestCase
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests:
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public function test_getDefaults_()
+	{
+		$api = new Api( $this->app );
+		$result = Utils::callPrivateMethod( $api, 'getDefaults' );
+		$this->assertNotEmpty( $result, 'Missing Api default config' );
+	}
+
+	public function test_getMethod_()
+	{
+		$method = 'login';
+
+		// Create new API method object in DI continer
+		$api = new Api( $this->app );
+		$new = Utils::callPrivateMethod( $api, 'getMethod', array( $method ) );
+
+		$class = 'Orkan\\Filmweb\\Api\\Method\\' . $method;
+		$this->assertSame( $this->app[$method], $new, "DI continer doesn't hold the same object reference returned by Api->getMethod('$method')" );
+		$this->assertTrue( $this->app[$method] instanceof $class, "DI continer doesn't hold instanceof $class" );
+	}
 
 	/**
 	 *
 	 * @group send
 	 * @dataProvider responseErrorProvider
 	 */
-	public function testCall_error( $response )
+	public function test_call_( $response )
 	{
 		$this->expectError();
 
@@ -81,7 +101,41 @@ class ApiTest extends TestCase
 	 * @group send
 	 * @dataProvider responseSuccessProvider
 	 */
-	public function testGetRequest_( $response )
+	public function test_getData_( $response )
+	{
+		$this->app['send']->expects( $this->once() )->method( 'with' )->willReturn( $response );
+
+		$api = new Api( $this->app );
+		$api->call( 'isLoggedUser', array() );
+
+		foreach ( array( 'array', 'json', 'raw', '' ) as $v ) { // Tip: 'extra' key can be empty
+			$this->assertNotEmpty( $api->getData( $v ), "Empty result in Api->getData('$v')" );
+		}
+	}
+
+	public function test_getQuery_()
+	{
+		$method = 'whatever';
+
+		$api = new Api( $this->app );
+		$query = Utils::callPrivateMethod( $api, 'getQuery', array( $method ) );
+
+		$result = [];
+		parse_str( $query, $result );
+
+		$this->assertStringContainsString( $method, $result['methods'], "Missing method string in request: $query" );
+
+		foreach ( array( 'methods', 'signature', 'version', 'appId' ) as $v ) {
+			$this->assertArrayHasKey( $v, $result, "Missing request key: '$v'" );
+		}
+	}
+
+	/**
+	 *
+	 * @group send
+	 * @dataProvider responseSuccessProvider
+	 */
+	public function test_getRequest_( $response )
 	{
 		$this->app['send']->expects( $this->once() )->method( 'with' )->willReturn( $response );
 
@@ -96,7 +150,7 @@ class ApiTest extends TestCase
 	 * @group send
 	 * @dataProvider responseSuccessProvider
 	 */
-	public function testGetResponse_( $response )
+	public function test_getResponse_( $response )
 	{
 		$this->app['send']->expects( $this->once() )->method( 'with' )->willReturn( $response );
 
@@ -106,28 +160,50 @@ class ApiTest extends TestCase
 		$this->assertSame( $response, $api->getResponse() );
 	}
 
-	/**
-	 *
-	 * @group send
-	 * @dataProvider responseSuccessProvider
-	 */
-	public function testGetData_( $response )
+	public function test_slowdown()
 	{
-		$this->app['send']->expects( $this->once() )->method( 'with' )->willReturn( $response );
+		$call_no = 10; // bytes
+		$pause = 300000; // usec
+
+		// Modify container values
+		/* @formatter:off */
+		$this->app['cfg'] = array_merge( array(
+			'limit_call' => $call_no, // usleep() after reaching this limit of call()'s
+			'limit_usec' => $pause, // In microseconds! 1s == 1 000 000 us
+		), $this->app['cfg'] );
+		/* @formatter:on */
 
 		$api = new Api( $this->app );
-		$api->call( 'isLoggedUser', array() );
+		Utils::setPrivateProperty( $api, 'calls', $call_no - 1 ); // if ( ++calls == limit_call ) >> trigger usleep()
+		Utils::callPrivateMethod( $api, 'slowdown' );
 
-		foreach ( array( 'array', 'json', 'raw', '' ) as $v ) { // Tip: 'extra' key can be empty
-			$this->assertNotEmpty( $api->getData( $v ), "Empty result in Api->getData('$v')" );
-		}
+		$this->assertEquals( $pause / 1000000, $api->getTotalSleep(), "Wrong value returned by Api->slowdown()" );
 	}
 
-	/**
-	 * @group single
-	 *
-	 */
-	public function testAll_Transport_GetTotal_methods()
+	public function test_getTotalSleep_()
+	{
+		$value = 2000000; // usec. The result is returned in sec, so 2000000/1000000 == 2 sec
+
+		$api = new Api( $this->app );
+		Utils::setPrivateProperty( $api, 'sleep_total', $value );
+
+		$result = $api->getTotalSleep();
+		$expected = $value / 1000000;
+
+		$this->assertEquals( $expected, $result, "Wrong value returned Api->getTotalSleep()" );
+	}
+
+	public function test_getTotalCalls_()
+	{
+		$value = 2;
+
+		$api = new Api( $this->app );
+		Utils::setPrivateProperty( $api, 'calls', $value );
+
+		$this->assertSame( $api->getTotalCalls(), $value );
+	}
+
+	public function test_All_Transport_GetTotal_methods()
 	{
 		// Api performs indirect call to Transport-> ... these methods
 		// Method names are the same in Api and Transport class
@@ -151,89 +227,5 @@ class ApiTest extends TestCase
 
 			$this->assertEquals( $expected, $result, "Wrong value returned by Api->$method()" );
 		}
-	}
-
-	public function testSlowdown()
-	{
-		$call_no = 10; // bytes
-		$pause = 300000; // usec
-
-		// Modify container values
-		/* @formatter:off */
-		$this->app['cfg'] = array_merge( array(
-			'limit_call' => $call_no, // usleep() after reaching this limit of call()'s
-			'limit_usec' => $pause, // In microseconds! 1s == 1 000 000 us
-		), $this->app['cfg'] );
-		/* @formatter:on */
-
-		$api = new Api( $this->app );
-		Utils::setPrivateProperty( $api, 'calls', $call_no - 1 ); // if ( ++calls == limit_call ) >> trigger usleep()
-		Utils::callPrivateMethod( $api, 'slowdown' );
-
-		$this->assertEquals( $pause / 1000000, $api->getTotalSleep(), "Wrong value returned Api->slowdown()" );
-	}
-
-	/**
-	 * @group single
-	 *
-	 */
-	public function testGetTotalSleep_()
-	{
-		$value = 2000000; // usec. The result is returned in sec, so 2000000/1000000 == 2 sec
-
-		$api = new Api( $this->app );
-		Utils::setPrivateProperty( $api, 'sleep_total', $value );
-
-		$result = $api->getTotalSleep();
-		$expected = $value / 1000000;
-
-		$this->assertEquals( $expected, $result, "Wrong value returned Api->getTotalSleep()" );
-	}
-
-	public function testGetQuery_()
-	{
-		$method = 'whatever';
-
-		$api = new Api( $this->app );
-		$query = Utils::callPrivateMethod( $api, 'getQuery', array( $method ) );
-
-		$result = [];
-		parse_str( $query, $result );
-
-		$this->assertStringContainsString( $method, $result['methods'], "Missing method string in request: $query" );
-
-		foreach ( array( 'methods', 'signature', 'version', 'appId' ) as $v ) {
-			$this->assertArrayHasKey( $v, $result, "Missing request key: '$v'" );
-		}
-	}
-
-	public function testGetMethod_()
-	{
-		$method = 'login';
-
-		// Create new API method object in DI continer
-		$api = new Api( $this->app );
-		$new = Utils::callPrivateMethod( $api, 'getMethod', array( $method ) );
-
-		$class = 'Orkan\\Filmweb\\Api\\Method\\' . $method;
-		$this->assertSame( $this->app[$method], $new, "DI continer doesn't hold the same object reference returned by Api->getMethod('$method')" );
-		$this->assertTrue( $this->app[$method] instanceof $class, "DI continer doesn't hold instanceof $class" );
-	}
-
-	public function testGetDefaults_()
-	{
-		$api = new Api( $this->app );
-		$result = Utils::callPrivateMethod( $api, 'getDefaults' );
-		$this->assertNotEmpty( $result, 'Missing Api default config' );
-	}
-
-	public function testGetTotalCalls_()
-	{
-		$value = 2;
-
-		$api = new Api( $this->app );
-		Utils::setPrivateProperty( $api, 'calls', $value );
-
-		$this->assertSame( $api->getTotalCalls(), $value );
 	}
 }

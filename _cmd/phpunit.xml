@@ -3,14 +3,16 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.1/phpunit.xsd"
 	bootstrap="..\..\vendor\autoload.php"
 	verbose="true"
+	columns="400"
 	>
 
 	<testsuites>
 
 		<testsuite name="all">
-			<file>..\FilmwebTest.php</file>
-			<file>..\UtilsTest.php</file>
+			<directory suffix="Test.php">..</directory>
 			<directory suffix="Test.php">..\Api</directory>
+			<directory suffix="Test.php">..\Api\Method</directory>
+			<exclude>..\_tmp</exclude>
 		</testsuite>
 
 		<testsuite name="methods">
@@ -19,5 +21,14 @@
 		</testsuite>
 
     </testsuites>
+
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true">
+		<directory suffix=".php">..\..\src</directory>
+		<exclude>
+			<file>..\..\src\Transport\CurlRequest.php</file>
+		</exclude>
+		</whitelist>
+	</filter>
 
 </phpunit>

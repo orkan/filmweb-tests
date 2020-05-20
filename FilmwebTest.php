@@ -3,11 +3,10 @@ use Orkan\Filmweb\Filmweb;
 use Orkan\Filmweb\Logger;
 use Orkan\Filmweb\Api\Api;
 use Orkan\Filmweb\Api\Method\login;
-use Orkan\Filmweb\Test\Utils;
+use Orkan\Filmweb\Tests\Utils;
 use Orkan\Filmweb\Transport\Curl;
 use Orkan\Filmweb\Transport\Transport;
 use PHPUnit\Framework\TestCase;
-use Pimple\Container;
 
 class FilmwebTest extends TestCase
 {
@@ -21,14 +20,6 @@ class FilmwebTest extends TestCase
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public function setUp(): void
 	{
-		// 		/* @formatter:off */
-// 		$cfg = array(
-// 			'api'       => '\\Orkan\\Filmweb\\Test\\Mock',
-// 			'tarnsport' => '\\Orkan\\Filmweb\\Test\\Mock',
-// 			'logger'    => '\\Orkan\\Filmweb\\Test\\Mock',
-// 		);
-// /* @formatter:on */
-
 		// Init Filmweb object with default settings
 		$this->filmweb = new Filmweb( $this->nickname, $this->password );
 
@@ -47,21 +38,17 @@ class FilmwebTest extends TestCase
 		$this->app['api'] = function () use ($stub ) {
 			return $stub;
 		};
+
 		$stub = $this->createStub( Curl::class );
 		$this->app['send'] = function () use ($stub ) {
 			return $stub;
 		};
+
 		$stub = $this->createStub( Logger::class );
 		$this->app['logger'] = function () use ($stub ) {
 			return $stub;
 		};
 	}
-
-	// public function errorHandler( int $errno, string $errstr, string $errfile, int $errline )
-	// {
-	// echo "\$errno: $errno, \$errstr: $errstr, \$errfile: $errfile, \$errline: $errline";
-	// return false;
-	// }
 
 	// $this->expectError();
 	// $this->markTestIncomplete('This test has not been implemented yet.');
@@ -72,18 +59,27 @@ class FilmwebTest extends TestCase
 
 	/**
 	 */
-	public function testConstruct_continer()
+	public function test_construct()
 	{
+		$app = Utils::getPrivateProperty( $this->filmweb, 'app' );
+		$this->assertSame( $this->app, $app, 'Missing Stubs in DI continer' );
+
 		$this->assertInstanceOf( Api::class, $this->app['api'] );
 		$this->assertInstanceOf( Transport::class, $this->app['send'] ); // Curl used in SetUp() !
 		$this->assertInstanceOf( Logger::class, $this->app['logger'] );
+	}
+
+	public function test_getDefaults_()
+	{
+		$result = Utils::callPrivateMethod( $this->filmweb, 'getDefaults' );
+		$this->assertNotEmpty( $result, 'Missing Filmweb default config' );
 	}
 
 	/**
 	 * First call to Filmweb->getApi() must trigger Api->getTotalCalls() and Api->call('login')
 	 * Api->getTotalCalls() must return 0
 	 */
-	public function testGetApi_first_call()
+	public function test_getApi_first_call()
 	{
 		$this->app['api']->expects( $this->once() )->method( 'getTotalCalls' )->willReturn( 0 );
 		$this->app['api']->expects( $this->once() )->method( 'call' )->with(
@@ -102,17 +98,11 @@ class FilmwebTest extends TestCase
 	 * Second call to Filmweb->getApi() must return $this->app['api'] object without Api->call(login)
 	 * Api->getTotalCalls() must return 1
 	 */
-	public function testGetApi_second_call()
+	public function test_getApi_second_call()
 	{
 		$this->app['api']->expects( $this->once() )->method( 'getTotalCalls' )->willReturn( 1 );
 		$this->app['api']->expects( $this->never() )->method( 'call' );
 		$this->filmweb->getApi();
-	}
-
-	public function testGetDefaults_()
-	{
-		$result = Utils::callPrivateMethod( $this->filmweb, 'getDefaults' );
-		$this->assertNotEmpty( $result, 'Missing Filmweb default config' );
 	}
 
 	/**
@@ -120,16 +110,29 @@ class FilmwebTest extends TestCase
 	 * Note:
 	 * There is no way to catch STDERR in PHPUnit
 	 * Don't use E_(USER)ERROR\WARNING since they'll trigger exit()
-	 *
-	 * @group single
 	 */
-	public function testErrorHandler_proccess_notice()
+	public function test_errorHandler_unknown()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-		error_reporting( E_DEPRECATED ); // Proccess this error in Filmweb->errorHandler()
 
+		error_reporting( E_DEPRECATED ); // Proccess this error in Filmweb->errorHandler()
 		$this->app['logger']->expects( $this->once() )->method( 'unknown' );
-		$this->filmweb->errorHandler( E_DEPRECATED, 'Testing Filmweb->errorHandler()', __FILE__, __LINE__ );
+
+		\Orkan\Filmweb\Utils::stderr( "\n" );
+		$this->filmweb->errorHandler( E_DEPRECATED, 'Testing Filmweb->errorHandler() with E_DEPRECATED', __FILE__, __LINE__ );
+
+		error_reporting( $tmp ); // Recover original error_reporting
+	}
+
+	public function test_errorHandler_notice()
+	{
+		$tmp = error_reporting(); // Remember current error_reporting
+
+		error_reporting( E_NOTICE );
+		$this->app['logger']->expects( $this->once() )->method( 'notice' );
+
+		\Orkan\Filmweb\Utils::stderr( "\n" );
+		$this->filmweb->errorHandler( E_NOTICE, 'Testing Filmweb->errorHandler() with E_NOTICE', __FILE__, __LINE__ );
 
 		error_reporting( $tmp ); // Recover original error_reporting
 	}
@@ -137,19 +140,29 @@ class FilmwebTest extends TestCase
 	/**
 	 * Test ignored errors
 	 */
-	public function testErrorHandler_ignore_notice()
+	public function test_errorHandler_ignore_notice()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-		error_reporting( E_ALL & ~ E_NOTICE ); // Ignore this error in Filmweb->errorHandler()
 
+		error_reporting( E_ALL & ~ E_NOTICE ); // Do not report E_NOTICE in Filmweb->errorHandler()
 		$this->app['logger']->expects( $this->never() )->method( 'notice' );
-		$this->filmweb->errorHandler( E_NOTICE, 'Testing ignored error in Filmweb->errorHandler()', __FILE__, __LINE__ );
+		$this->filmweb->errorHandler( E_NOTICE, 'Testing Filmweb->errorHandler() with ignored E_NOTICE', __FILE__, __LINE__ );
 
 		error_reporting( $tmp ); // Recover original error_reporting
 	}
 
-	public function testGetExecTime_()
+	public function test_getTitle_()
 	{
-		$this->assertIsFloat( $this->filmweb->getExectime() );
+		$this->assertNotEmpty( $this->filmweb->getExectime() );
+	}
+
+	public function test_getExecTime_()
+	{
+		$result1 = $this->filmweb->getExectime();
+		usleep( 300000 ); // sleep 0.3sec
+		$result2 = $this->filmweb->getExectime();
+
+		$this->assertGreaterThan( $result1, $result2 );
+		$this->assertIsFloat( $result2 );
 	}
 }

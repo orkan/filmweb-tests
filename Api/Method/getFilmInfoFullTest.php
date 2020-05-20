@@ -1,20 +1,18 @@
 <?php
-
 use Orkan\Filmweb\Api\Method\getFilmInfoFull;
 use PHPUnit\Framework\TestCase;
 
 class getFilmInfoFullTest extends TestCase
 {
-	public function testType()
+
+	public function test_type()
 	{
-		$this->assertSame( 'get', ( new getFilmInfoFull )::TYPE );
+		$this->assertSame( 'get', ( new getFilmInfoFull() )::TYPE );
 	}
-	
-	public function testFormat( $filmId = 36797 )
+
+	public function test_format( $filmId = 36797 )
 	{
-		$args = array(
-			getFilmInfoFull::FILMID => $filmId,
-		);
-		$this->assertSame( "getFilmInfoFull [$filmId]", ( new getFilmInfoFull )->format( $args ) );
+		$args = array( getFilmInfoFull::FILMID => $filmId );
+		$this->assertSame( "getFilmInfoFull [$filmId]", ( new getFilmInfoFull() )->format( $args ) );
 	}
 }

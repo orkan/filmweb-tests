@@ -5,7 +5,9 @@ rem Grab some predefined phpunit switches
 call env.inc.bat
 
 rem -----------------------------------------------------------
-set COMMAND=phpunit %PHPUNIT_COVERAGE_WHITELIST% %PHPUNIT_COVERAGE%
+rem whitelist moved to phpunit.xml
+rem set COMMAND=phpunit %PHPUNIT_COVERAGE_WHITELIST% %PHPUNIT_COVERAGE%
+set COMMAND=phpunit %PHPUNIT_COVERAGE%
 rem -----------------------------------------------------------
 
 rem Copy COMMAND to clipboard

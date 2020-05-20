@@ -1,20 +1,22 @@
 <?php
-
 use Orkan\Filmweb\Api\Method\getUserFilmVotes;
 use PHPUnit\Framework\TestCase;
 
 class getUserFilmVotesTest extends TestCase
 {
-	public function testType()
+
+	public function test_type()
 	{
-		$this->assertSame( 'get', ( new getUserFilmVotes )::TYPE );
+		$this->assertSame( 'get', ( new getUserFilmVotes() )::TYPE );
 	}
 
-	public function testFormat( $userId = 36797 )
+	public function test_format( $userId = 36797 )
 	{
+		/* @formatter:off */
 		$args = array(
 			getUserFilmVotes::USERID => $userId,
 		);
-		$this->assertSame( "getUserFilmVotes [$userId, 1]", ( new getUserFilmVotes )->format( $args ) );
+		/* @formatter:on */
+		$this->assertSame( "getUserFilmVotes [$userId, 1]", ( new getUserFilmVotes() )->format( $args ) );
 	}
 }

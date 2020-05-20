@@ -1,5 +1,5 @@
 <?php
-namespace Orkan\Filmweb\Test;
+namespace Orkan\Filmweb\Tests;
 
 use ReflectionClass;
 

@@ -1,5 +1,4 @@
 <?php
-
 use Orkan\Filmweb\Api\Method\login;
 use PHPUnit\Framework\TestCase;
 
@@ -7,35 +6,41 @@ class loginTest extends TestCase
 {
 	private $method;
 
-	protected function setUp(): void
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public function credentialsProvider()
 	{
-		$this->method = new login;
+		/* @formatter:off */
+		return array (
+			//                        | name | pass          | addslashes(pass)
+			'ascii'        => array ( 'user' , 'pass'        , 'pass'          ),
+			'single quote' => array ( 'MisiU', "Z*cq+a'XmRb^", "Z*cq+a\'XmRb^" ),
+			'double quote' => array ( 'adam1', ')ErWZ&%u"CE9', ')ErWZ&%u\"CE9' ),
+		);
+		/* @formatter:on */
 	}
 
-	public function testType()
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests:
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public function test_type()
 	{
-		$this->assertSame( 'post', $this->method::TYPE );
+		$this->assertSame( 'post', ( new login() )::TYPE );
 	}
 
 	/**
+	 *
 	 * @dataProvider credentialsProvider
 	 */
-	public function testFormat( $nick, $pass_raw, $pass_prep )
+	public function test_format( $nick, $pass_raw, $pass_prep )
 	{
+		/* @formatter:off */
 		$args = array(
 			login::NICKNAME => $nick,
 			login::PASSWORD => $pass_raw,
 		);
-		$this->assertSame( 'login ["' . $nick . '", "' . $pass_prep . '", 1]', $this->method->format( $args ) );
-	}
-
-	public function credentialsProvider()
-	{
-		return array (
-			//      | name | pass raw      | pass prepared
-			array ( 'user' , 'pass'        , 'pass'          ),
-			array ( 'adam1', ')ErWZ&%u"CE9', ')ErWZ&%u\"CE9' ), // addslashes()
-			array ( 'MisiU', "Z*cq+a'XmRb^", "Z*cq+a\'XmRb^" ), // addslashes()
-		);
+		/* @formatter:on */
+		$this->assertSame( 'login ["' . $nick . '", "' . $pass_prep . '", 1]', ( new login() )->format( $args ) );
 	}
 }
