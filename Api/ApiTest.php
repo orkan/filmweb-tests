@@ -101,7 +101,7 @@ class ApiTest extends TestCase
 	 * @group send
 	 * @dataProvider responseSuccessProvider
 	 */
-	public function test_getData_( $response )
+	public function test_getData_all( $response )
 	{
 		$this->app['send']->expects( $this->once() )->method( 'with' )->willReturn( $response );
 
@@ -111,6 +111,60 @@ class ApiTest extends TestCase
 		foreach ( array( 'array', 'json', 'raw', '' ) as $v ) { // Tip: 'extra' key can be empty
 			$this->assertNotEmpty( $api->getData( $v ), "Empty result in Api->getData('$v')" );
 		}
+	}
+
+	/**
+	 * Api->getData('raw') must return original server response
+	 */
+	public function test_getData_raw()
+	{
+		$response = 'raw response from server';
+
+		$api = new Api( $this->app );
+		Utils::setPrivateProperty( $api, 'response', $response );
+
+		$this->assertSame( $response, $api->getData( 'raw' ) );
+	}
+
+	/**
+	 * Api->getData('array') must return decoded JSON extracted from response
+	 */
+	public function test_getData_array()
+	{
+		$output = "[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]";
+		$array = json_decode($output);
+
+		$api = new Api( $this->app );
+		Utils::setPrivateProperty( $api, 'output', $output );
+
+		$this->assertSame( $array, $api->getData( 'array' ) );
+	}
+
+	/**
+	 * Api->getData('json') must return original JSON object extracted from response
+	 */
+	public function test_getData_json()
+	{
+		$output = "[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]";
+
+		$api = new Api( $this->app );
+		Utils::setPrivateProperty( $api, 'output', $output );
+
+		$this->assertSame( $output, $api->getData( 'json' ) );
+	}
+
+	/**
+	 * Api->getData('extra') everything after ] (JSON encoded object)
+	 */
+	public function test_getData_extra()
+	{
+		$extra = " t:43200\n";
+		$output = "[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]$extra";
+
+		$api = new Api( $this->app );
+		Utils::setPrivateProperty( $api, 'output', $output );
+
+		$this->assertSame( $extra, $api->getData( 'extra' ) );
 	}
 
 	public function test_getQuery_()
