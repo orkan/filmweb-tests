@@ -108,6 +108,11 @@ class FilmwebTest extends TestCase
 		$this->filmweb->getApi();
 	}
 
+	public function test_getLogger_()
+	{
+		$this->assertInstanceOf( Logger::class, $this->filmweb->getLogger() );
+	}
+
 	/**
 	 * Use E_DEPRECATED const to trigger Logger->unknown() in Filmweb->errorHandler()
 	 * Note:

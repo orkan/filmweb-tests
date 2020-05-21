@@ -23,11 +23,27 @@ class UtilsTest extends TestCase
 	{
 		/* @formatter:off */
 		return array (
-			'seconds' => [ '12s', 12 ],
-			'minutes' => [ '3m', 3 * 60],
-			'hours with usec'    => [ '1g 34m 45.987s', 3600 + 34 * 60 + 45 + 0.987 ],
-			'hours without usec' => [ '1g 34m 45s', 3600 + 34 * 60 + 45 + 0.987, false ],
-			'days'    => [ '18401d 21g 19m 44s', 1589923184.4001, false ],
+			'microtime-usec' => [ '0s'    , 0.1234, false ],
+			'microtime+usec' => [ '0.123s', 0.1234 ],
+
+			'zero-usec' => [ '0s', 0, false ],
+			'zero+usec' => [ '0s', 0 ],
+
+			'seconds'      => [ '12s'   , 12 ],
+			'seconds-usec' => [ '12s'   , 12.66, false ],
+			'seconds+usec' => [ '12.66s', 12.66 ],
+
+			'minutes'      => [ '3m 0s'   , 3 * 60 ],
+			'minutes-usec' => [ '3m 0s'   , 3 * 60 + 0.1201, false],
+			'minutes+usec' => [ '3m 0.12s', 3 * 60 + 0.1201],
+
+			'hours'      => [ '1g 34m 45s'    , 3600 + 34 * 60 + 45 ],
+			'hours-usec' => [ '1g 34m 45s'    , 3600 + 34 * 60 + 45 + 0.987, false ],
+			'hours+usec' => [ '1g 34m 45.987s', 3600 + 34 * 60 + 45 + 0.987 ],
+
+			'days'      => [ '2d 11g 19m 36s'  , 2 * 86400 + 11 * 3600 + 19 * 60 + 36 ],
+			'days-usec' => [ '2d 11g 19m 36s'  , 2 * 86400 + 11 * 3600 + 19 * 60 + 36 + 0.4001, false ],
+			'days+usec' => [ '2d 11g 19m 36.4s', 2 * 86400 + 11 * 3600 + 19 * 60 + 36 + 0.4001 ],
 		);
 		/* @formatter:on */
 	}

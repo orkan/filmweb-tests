@@ -34,7 +34,7 @@ class LoggerTest extends TestCase
 
 	/**
 	 */
-	public function test_construct_Monolog()
+	public function test_construct()
 	{
 		$this->assertInstanceOf( \Monolog\Logger::class, $this->monolog );
 	}
