@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-rem Grab some predefined phpunit switches
-call env.inc.bat
+set PHPUNIT_COVERAGE_DIR=..\_coverage
+set PHPUNIT_COVERAGE=--coverage-html %PHPUNIT_COVERAGE_DIR%
 
 rem -----------------------------------------------------------
 rem whitelist moved to phpunit.xml

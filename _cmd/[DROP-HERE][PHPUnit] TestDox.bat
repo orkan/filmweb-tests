@@ -1,9 +1,6 @@
 @echo off
 setlocal
 
-rem Grab some predefined phpunit switches
-call env.inc.bat
-
 rem -----------------------------------------------------------
 set COMMAND=phpunit --testdox --stop-on-error %1
 rem set COMMAND=phpunit --testdox --stop-on-error --stop-on-failure %~nx1

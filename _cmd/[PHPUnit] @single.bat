@@ -1,9 +1,6 @@
 @echo off
 setlocal
 
-rem Grab some predefined phpunit switches
-call env.inc.bat
-
 rem ------ config ----------
 set GROUP=single
 rem ------------------------
