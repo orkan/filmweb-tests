@@ -11,6 +11,20 @@ class CurlTest extends TestCase
 	protected $app;
 	protected $send;
 
+	/**
+	 * Simulate curl_getinfo() result
+	 *
+	 * @var array
+	 */
+	protected $curl_getinfo_data = array(
+	/* @formatter:off */
+		'total_time'    => 2,
+		'header_size'   => 3,
+		'request_size'  => 4,
+		'size_download' => 5,
+	);
+	/* @formatter:on */
+
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers Helpers
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +57,7 @@ class CurlTest extends TestCase
 	 */
 	public function test_get()
 	{
+		$this->app['request']->expects( $this->once() )->method( 'getInfo' )->willReturn( $this->curl_getinfo_data );
 		$this->app['request']->expects( $this->once() )->method( 'exec' )->willReturn( 'response' );
 
 		$send = new Curl( $this->app );
@@ -53,6 +68,7 @@ class CurlTest extends TestCase
 
 	public function test_post()
 	{
+		$this->app['request']->expects( $this->once() )->method( 'getInfo' )->willReturn( $this->curl_getinfo_data );
 		$this->app['request']->expects( $this->once() )->method( 'exec' )->willReturn( 'response' );
 
 		$send = new Curl( $this->app );
@@ -63,29 +79,20 @@ class CurlTest extends TestCase
 
 	public function test_exec()
 	{
-		/* @formatter:off */
-		$info = array(
-			'total_time'    => 2,
-			'header_size'   => 3,
-			'request_size'  => 4,
-			'size_download' => 5,
-		);
-		/* @formatter:on */
-
 		$this->app['request']->expects( $this->once() )->method( 'init' );
 		$this->app['request']->expects( $this->once() )->method( 'setOptArray' );
 		$this->app['request']->expects( $this->once() )->method( 'exec' )->willReturn( 'response' );
-		$this->app['request']->expects( $this->once() )->method( 'getInfo' )->willReturn( $info );
+		$this->app['request']->expects( $this->once() )->method( 'getInfo' )->willReturn( $this->curl_getinfo_data );
 		$this->app['request']->expects( $this->once() )->method( 'close' );
 
 		$send = new Curl( $this->app );
 		Utils::callPrivateMethod( $send, 'exec', array( array() ) );
 
-		/* @formatter:off */
 		$data = array(
-			'total_time'         => $info['total_time'],
-			'total_data_sent'    => $info['header_size'] + $info['request_size'],
-			'total_data_recived' => $info['size_download'],
+		/* @formatter:off */
+			'total_time'         => $this->curl_getinfo_data['total_time'],
+			'total_data_sent'    => $this->curl_getinfo_data['header_size'] + $this->curl_getinfo_data['request_size'],
+			'total_data_recived' => $this->curl_getinfo_data['size_download'],
 		);
 		/* @formatter:on */
 
@@ -94,12 +101,23 @@ class CurlTest extends TestCase
 		}
 	}
 
-	public function test_exec_with_error()
+	public function test_exec_error_no_data()
 	{
 		$this->expectError();
+		$this->app['request']->expects( $this->once() )->method( 'getInfo' )->willReturn( false );
+
+		$send = new Curl( $this->app );
+		Utils::callPrivateMethod( $send, 'exec', array( array() ) );
+	}
+
+	public function test_exec_error_no_response()
+	{
+		$this->expectError();
+		$this->app['request']->expects( $this->once() )->method( 'getInfo' )->willReturn( $this->curl_getinfo_data );
 		$this->app['request']->expects( $this->once() )->method( 'exec' )->willReturn( false );
 
-		Utils::callPrivateMethod( new Curl( $this->app ), 'exec', array( array() ) );
+		$send = new Curl( $this->app );
+		Utils::callPrivateMethod( $send, 'exec', array( array() ) );
 	}
 
 	public function test_getTotalTime_()
