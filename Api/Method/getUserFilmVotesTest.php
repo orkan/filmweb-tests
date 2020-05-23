@@ -14,7 +14,7 @@ class getUserFilmVotesTest extends TestCase
 	{
 		/* @formatter:off */
 		$args = array(
-			getUserFilmVotes::USERID => $userId,
+			getUserFilmVotes::ID => $userId,
 		);
 		/* @formatter:on */
 		$this->assertSame( "getUserFilmVotes [$userId, 1]", ( new getUserFilmVotes() )->format( $args ) );

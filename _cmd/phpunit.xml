@@ -23,11 +23,16 @@
     </testsuites>
 
 	<filter>
-		<whitelist processUncoveredFilesFromWhitelist="true">
-		<directory suffix=".php">..\..\src</directory>
-		<exclude>
-			<file>..\..\src\Transport\CurlRequest.php</file>
-		</exclude>
+		<whitelist 
+		>
+			<directory suffix=".php">..\..\src\</directory>
+			<exclude>
+				<directory>..\..\src\.badges</directory>
+				<directory suffix="Test.php">..\Api\Method</directory>
+				<file>..\..\src\Transport\CurlRequest.php</file>
+				<file>..\..\src\Api\Method\getFilmComments~.php</file>
+				<file>..\..\src\Api\Method\getFilmsNearestBroadcasts~.php</file>
+			</exclude>
 		</whitelist>
 	</filter>
 

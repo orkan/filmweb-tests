@@ -10,9 +10,14 @@ class getFilmInfoFullTest extends TestCase
 		$this->assertSame( 'get', ( new getFilmInfoFull() )::TYPE );
 	}
 
-	public function test_format( $filmId = 36797 )
+	public function test_format( $id = 36797 )
 	{
-		$args = array( getFilmInfoFull::FILMID => $filmId );
-		$this->assertSame( "getFilmInfoFull [$filmId]", ( new getFilmInfoFull() )->format( $args ) );
+		/* @formatter:off */
+		$args = array(
+			getFilmInfoFull::ID => $id,
+		);
+		/* @formatter:on */
+
+		$this->assertSame( "getFilmInfoFull [$id]", ( new getFilmInfoFull() )->format( $args ) );
 	}
 }
