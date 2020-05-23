@@ -50,7 +50,7 @@ class ApiTest extends TestCase
 	{
 		/* @formatter:off */
 		return array(
-			'isLoggedUser'    => ["ok\n[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]\n"],
+			'isLoggedUser'    => ["ok\n[\"nick\",null,null,12345,\"M\",\"1\",\"1\",\"1\"]\n"],
 			'getFilmInfoFull' => ["ok\n[\"Boogie Nights\",null,7.15972,25883,\"Dramat\",1997,156,0,\"https:\/\/www.filmweb.pl\/film\/Boogie+Nights-1997-19\/discussion\",1,1,\"\/00\/19\/19\/7175962.2.jpg\",null,\"1997-09-11\",\"1998-08-14\",0,0,0,\"USA\",\"Historia m\u0142odzie\u0144ca, Eddiego, kt\u00f3ry dzi\u0119ki du\u017cemu przyrodzeniu, prze\u017cywa sw\u00f3j \\\"ameryka\u0144ski sen\\\" od zera do Dirka Digglera, gwiazdy film\u00f3w porno.\"] t:43200\n"],
 		);
 		/* @formatter:on */
@@ -131,7 +131,7 @@ class ApiTest extends TestCase
 	 */
 	public function test_getData_array()
 	{
-		$output = "[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]";
+		$output = "[\"nick\",null,null,12345,\"M\",\"1\",\"1\",\"1\"]";
 		$array = json_decode($output);
 
 		$api = new Api( $this->app );
@@ -145,7 +145,7 @@ class ApiTest extends TestCase
 	 */
 	public function test_getData_json()
 	{
-		$output = "[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]";
+		$output = "[\"nick\",null,null,12345,\"M\",\"1\",\"1\",\"1\"]";
 
 		$api = new Api( $this->app );
 		Utils::setPrivateProperty( $api, 'output', $output );
@@ -159,7 +159,7 @@ class ApiTest extends TestCase
 	public function test_getData_extra()
 	{
 		$extra = " t:43200\n";
-		$output = "[\"orkans\",null,null,882837,\"M\",\"1\",\"1\",\"1\"]$extra";
+		$output = "[\"nick\",null,null,12345,\"M\",\"1\",\"1\",\"1\"]$extra";
 
 		$api = new Api( $this->app );
 		Utils::setPrivateProperty( $api, 'output', $output );
