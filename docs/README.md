@@ -1,7 +1,3 @@
-+---
-+layout: post
-+title: Blogging Like a Hacker
-+---
 # filmweb-tests
 PHPUnit tests for filmweb-api
 
@@ -20,9 +16,6 @@ Permalink: https://jekyllrb.com/docs/datafiles/#example-list-of-members
   </li>
 {% endfor %}
 </ul>
-
-
-
 
 ## Basic usage of fimweb-api
 ```php
