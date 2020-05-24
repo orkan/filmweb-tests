@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "Snippet highlighting!"
 tag: code highlighting
 tags: code highlighting Liquid templates
