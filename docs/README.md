@@ -9,17 +9,6 @@ Your site is ready to be published at https://orkan.github.io/filmweb-tests/.
 * `{% post_url /about/about %}` [The About page is here]({% post_url /about/about %})
 * More info is at: https://jekyllrb.com/docs/liquid/tags/#linking-to-posts
 
-### List of posts
-Permalink: https://jekyllrb.com/docs/posts/#displaying-an-index-of-posts
-
-<ul>
-  {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
-
 ### List of tags
 Permalink: https://jekyllrb.com/docs/posts/#tags-and-categories
 
