@@ -8,23 +8,6 @@ PHPUnit tests for filmweb-api
 ## GitHub Pages 
 Your site is ready to be published at https://orkan.github.io/filmweb-tests/. 
 
-### post_url's
-* `{% post_url 2020-05-24-how-to-write-a-blog %}` Is available at: {% post_url 2020-05-24-how-to-write-a-blog %}
-* `{% post_url /about/about %}` [The About page is here]({% post_url /about/about %})
-* More info is at: https://jekyllrb.com/docs/liquid/tags/#linking-to-posts
-
-### List of tags
-Permalink: https://jekyllrb.com/docs/posts/#tags-and-categories
-
-{% for tag in site.tags %}
-  <h3>{{ tag[0] }}</h3>
-  <ul>
-    {% for post in tag[1] %}
-      <li><a href="{{ post.url }}">{{ post.title }}</a></li>
-    {% endfor %}
-  </ul>
-{% endfor %}
-
 ### Custom data file: _data/members.yml
 Permalink: https://jekyllrb.com/docs/datafiles/#example-list-of-members
 
