@@ -1,12 +1,10 @@
 <?php
-use PHPUnit\Framework\TestCase;
 use Orkan\Filmweb\Filmweb;
 use Orkan\Filmweb\Logger;
-use Orkan\Filmweb\Api\Api;
 use Orkan\Filmweb\Api\Method\isLoggedUser;
 use Orkan\Filmweb\Tests\Utils;
 use Orkan\Filmweb\Transport\Curl;
-use Orkan\Filmweb\Transport\CurlRequest;
+use PHPUnit\Framework\TestCase;
 
 class ReadmeTest extends TestCase
 {
@@ -37,17 +35,20 @@ class ReadmeTest extends TestCase
 			return $stub;
 		};
 
-		// Setup responses for each of calls
+		// Setup Transport responses for each calls initiated
 		$this->app['send']->method( 'with' )->will( $this->onConsecutiveCalls(
 		/* @formatter:off */
 
-			// $api->call( 'login' )
+			// 1: Api::call 'login'
+			// Login to Filmweb
 			"ok\nexc Parameters don not seem to be in JSON format\n",
 
-			// $api->call( 'isLoggedUser' )
+			// 2: Api::call 'isLoggedUser'
+			// Get user info
 			"ok\n[\"nick\",null,null,12345,\"M\",\"1\",\"1\",\"1\"]\n",
 
-			// $api->call( 'getUserFilmVotes' )
+			// 3: Api::call 'getUserFilmVotes'
+			// Get list of voted films
 			"ok\n[1589838401473,[31293,1206831600000,10,1,null,0],[11075,1206831600000,10,0,null,0]] s\n"
 		));
 		/* @formatter:on */
@@ -71,7 +72,6 @@ class ReadmeTest extends TestCase
 		// Get list of voted films
 		$api->call( 'getUserFilmVotes', array( $userId ) );
 		$films = $api->getData();
-
 
 		// ///////////////////////////////////////////////////////////////////////////////////////
 		// Assertions...
