@@ -1,3 +1,7 @@
++---
++layout: post
++title: Blogging Like a Hacker
++---
 # filmweb-tests
 PHPUnit tests for filmweb-api
 
