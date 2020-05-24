@@ -1,5 +1,6 @@
 /_*/
 !/_cmd/
+/docs/_site/
 /docs/.jekyll-metadata
 *.txt
 *.lnk
