@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.1/phpunit.xsd"
-	bootstrap="..\..\vendor\autoload.php"
+	bootstrap="../../vendor/autoload.php"
 	verbose="true"
-	columns="400"
+	columns="60"
 	>
 
 	<testsuites>
 
 		<testsuite name="all">
 			<directory suffix="Test.php">..</directory>
-			<directory suffix="Test.php">..\Api</directory>
-			<directory suffix="Test.php">..\Api\Method</directory>
-			<exclude>..\_tmp</exclude>
+			<directory suffix="Test.php">../Api</directory>
+			<directory suffix="Test.php">../Api/Method</directory>
+			<exclude>../_tmp</exclude>
 		</testsuite>
 
 		<testsuite name="methods">
-			<directory suffix="Test.php">..\Api\Method</directory>
-			<exclude>..\Api\Method\MethodTest.php</exclude>
+			<directory suffix="Test.php">../Api/Method</directory>
+			<exclude>../Api/Method/MethodTest.php</exclude>
 		</testsuite>
 
     </testsuites>
@@ -25,13 +25,12 @@
 	<filter>
 		<whitelist 
 		>
-			<directory suffix=".php">..\..\src\</directory>
+			<directory suffix=".php">../../src/</directory>
 			<exclude>
-				<directory>..\..\src\.badges</directory>
-				<directory suffix="Test.php">..\Api\Method</directory>
-				<file>..\..\src\Transport\CurlRequest.php</file>
-				<file>..\..\src\Api\Method\getFilmComments~.php</file>
-				<file>..\..\src\Api\Method\getFilmsNearestBroadcasts~.php</file>
+				<directory>../../src/.badges</directory>
+				<file>../../src/Transport/CurlRequest.php</file>
+				<file>../../src/Api/Method/getFilmComments~.php</file>
+				<file>../../src/Api/Method/getFilmsNearestBroadcasts~.php</file>
 			</exclude>
 		</whitelist>
 	</filter>
