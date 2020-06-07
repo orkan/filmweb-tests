@@ -41,7 +41,9 @@ class ReadmeTest extends TestCase
 
 			// 1: Api::call 'login'
 			// Login to Filmweb
-			"ok\nexc Parameters don not seem to be in JSON format\n",
+			// Info: PHPUnit cathes any trigger_error() and prints callstack during tests if $this->expectError(); is omited
+			// exx != exc -> suppresses printing errors on screen
+			"ok\nexx Parameters don not seem to be in JSON format\n", 
 
 			// 2: Api::call 'isLoggedUser'
 			// Get user info
@@ -52,12 +54,22 @@ class ReadmeTest extends TestCase
 			"ok\n[1589838401473,[31293,1206831600000,10,1,null,0],[11075,1206831600000,10,0,null,0]] s\n"
 		));
 		/* @formatter:on */
+
+		// Suppress printing errors on screen
+		// define( 'TESTING', true );
+		// $this->app['errorHandler'] = array( $this, 'errorHandler' );
+		// set_error_handler( function(){return false;} );
 	}
+
+	// public function errorHandler()
+	// {
+		// return true;
+	// }
 
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests: Tests:
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	public function testExampleFromReadme()
+	public function testExampleFromReadme_()
 	{
 		// Login to Filmweb
 		// $filmweb = new Filmweb( $login, $password );

@@ -113,19 +113,33 @@ class FilmwebTest extends TestCase
 		$this->assertInstanceOf( Logger::class, $this->filmweb->getLogger() );
 	}
 
+
 	/**
-	 * Use E_DEPRECATED const to trigger Logger->unknown() in Filmweb->errorHandler()
-	 * Note:
-	 * There is no way to catch STDERR in PHPUnit
-	 * Use define( 'TESTING', true ) to test for error handling and not trigger exit()
+	 * Test errors
 	 */
-	public function test_errorHandler_unknown()
+	public function test_errorHandler_error()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-		error_reporting( E_DEPRECATED ); // Proccess this error in Filmweb->errorHandler()
+		error_reporting( E_ERROR );
 
-		$this->app['logger']->expects( $this->once() )->method( 'unknown' );
-		$this->filmweb->errorHandler( E_DEPRECATED, 'Testing Filmweb->errorHandler() with E_DEPRECATED', __FILE__, __LINE__ );
+		$this->app['logger']->expects( $this->once() )->method( 'error' );
+
+		$this->app['cfg'] = array_merge( $this->app['cfg'], array( 'exit_on' => 0 ) ); // Suppress exit
+		$this->filmweb->errorHandler( E_ERROR, 'Testing Filmweb->errorHandler() with E_ERROR', __FILE__, __LINE__ );
+
+		error_reporting( $tmp ); // Recover original error_reporting
+	}
+
+	/**
+	 * @group single
+	 */
+	public function test_errorHandler_user_warning()
+	{
+		$tmp = error_reporting(); // Remember current error_reporting
+		error_reporting( E_USER_WARNING );
+
+		$this->app['logger']->expects( $this->once() )->method( 'warning' );
+		$this->filmweb->errorHandler( E_USER_WARNING, 'Testing Filmweb->errorHandler() with E_USER_WARNING', __FILE__, __LINE__ );
 
 		error_reporting( $tmp ); // Recover original error_reporting
 	}
@@ -141,13 +155,19 @@ class FilmwebTest extends TestCase
 		error_reporting( $tmp ); // Recover original error_reporting
 	}
 
-	public function test_errorHandler_error()
+	/**
+	 * Use E_DEPRECATED const to trigger Logger->unknown() in Filmweb->errorHandler()
+	 * Note:
+	 * There is no way to catch STDERR in PHPUnit
+	 * Use define( 'TESTING', true ) to test for error handling and not trigger exit()
+	 */
+	public function test_errorHandler_unknown()
 	{
 		$tmp = error_reporting(); // Remember current error_reporting
-		error_reporting( E_ERROR );
+		error_reporting( E_DEPRECATED ); // Proccess this error in Filmweb->errorHandler()
 
-		$this->app['logger']->expects( $this->once() )->method( 'error' );
-		$this->filmweb->errorHandler( E_ERROR, 'Testing Filmweb->errorHandler() with E_NOTICE', __FILE__, __LINE__ );
+		$this->app['logger']->expects( $this->once() )->method( 'unknown' );
+		$this->filmweb->errorHandler( E_DEPRECATED, 'Testing Filmweb->errorHandler() with E_DEPRECATED', __FILE__, __LINE__ );
 
 		error_reporting( $tmp ); // Recover original error_reporting
 	}

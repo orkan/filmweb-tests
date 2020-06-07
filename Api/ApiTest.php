@@ -37,10 +37,24 @@ class ApiTest extends TestCase
 	{
 		/* @formatter:off */
 		return array(
-			'Error Decode'   => ["ok\n[--- bad json object ---]\n"],
-			'Error NoJson'   => ["ok\n--- no json object ---\n"   ],
-			'Wrong Response' => ["ok--- wrong response ---"       ],
-			'Filmweb Error'  => ["err\n[--- filmweb error ---]\n" ],
+			//'null response'  => [null], // @see Transport::with - always return string!
+			'Empty response'     => [''],
+			'Decode error'       => ["ok\n[--- bad json object ---]\n"],
+			'No JSON object'     => ["ok\n--- no json object ---\n"],
+			'Wrong format'       => ["ok--- wrong response format ---"],
+//			'Filmweb exception'  => ["ok\nexc Parameters don not seem to be in JSON format\n"],
+			'Filmweb error'      => ["err\n[--- filmweb error ---]\n"],
+		);
+		/* @formatter:on */
+	}
+
+	// Mock Transport object with fixed Exception responses
+	public function responseExceptionProvider()
+	{
+		/* @formatter:off */
+		return array(
+			'No JSON format' => ["ok\nexc Parameters don not seem to be in JSON format\n"],
+			'Not logged in'  => ["ok\nexc UserNotLoggedInException\n"],
 		);
 		/* @formatter:on */
 	}
@@ -81,10 +95,11 @@ class ApiTest extends TestCase
 
 	/**
 	 *
+	 * @group single2
 	 * @group send
 	 * @dataProvider responseErrorProvider
 	 */
-	public function test_call_( $response )
+	public function test_call_Error( $response )
 	{
 		$this->expectError();
 
@@ -93,6 +108,27 @@ class ApiTest extends TestCase
 		// Start Api method test
 		$api = new Api( $this->app );
 		$api->call( 'isLoggedUser', array() );
+		$api->getData();
+	}
+
+	/**
+	 * @group single
+	 * @dataProvider responseExceptionProvider
+	 */
+	public function test_call_Warning( $response )
+	{
+		// Extract exc message
+		$message = explode( "\n", $response );
+		$message = substr( $message[1], 4 );
+
+		$this->expectError();
+		$this->expectErrorMessage( $message );
+
+		$this->app['send']->expects( $this->once() )->method( 'with' )->willReturn( $response );
+
+		$api = new Api( $this->app );
+		$api->call( 'isLoggedUser', array() );
+		//$api->call( 'getUserFilmVotes', array( 882837, 1 ) );
 		$api->getData();
 	}
 

@@ -47,6 +47,8 @@ class LoggerTest extends TestCase
 
 	public function test_backtrace()
 	{
+		$this->app['cfg'] = array_merge( $this->app['cfg'], array( 'is_debug' => true ) ); // backtrace in debug mode only
+		
 		$result = Utils::callPrivateMethod( $this->logger, 'backtrace' );
 		$this->assertStringContainsString( 'Utils::callPrivateMethod', $result );
 	}

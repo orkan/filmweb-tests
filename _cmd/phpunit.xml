@@ -13,6 +13,7 @@
 			<directory suffix="Test.php">../Api</directory>
 			<directory suffix="Test.php">../Api/Method</directory>
 			<exclude>../_tmp</exclude>
+			<exclude>../_composer</exclude>
 		</testsuite>
 
 		<testsuite name="methods">
